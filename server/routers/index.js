@@ -2,6 +2,7 @@ const express = require('express');
 const registerUser = require('../controller/registerUser');
 const checkPhone = require('../controller/checkPhone');
 const checkPassword = require('../controller/checkPassword');
+const loginUser = require('../controller/loginUser');
 const userDetails = require('../controller/userDetails');
 const updateUserDetails = require('../controller/updateUserDetails');
 const logout = require('../controller/logout');
@@ -16,6 +17,9 @@ router.post('/phone', checkPhone);
 
 // Check user password (Login)
 router.post('/password', checkPassword);
+
+// Login user with phone and password
+router.post('/login', loginUser);
 
 // Get user details
 router.get('/user-details', userDetails);
