@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import logo from "/vite.svg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
 import LoginWithQR from "../pages/LoginWithQR";
 import LoginWithPhonePage from "../pages/LoginWithPhonePage";
+import RegisterPage from "../pages/RegisterPage";
 
 export default function AuthLayout() {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -12,6 +12,7 @@ export default function AuthLayout() {
   const buttonRef = useRef(null);
 
   const [isLoginWithQR, setIsLoginWithQR] = useState(true);
+  const [isLoginWithPhone, setIsLoginWithPhone] = useState(false);
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -36,8 +37,29 @@ export default function AuthLayout() {
   }, []);
 
   const handleLoginWithPhone = () => {
+    setIsLoginWithPhone(true);
     setIsLoginWithQR(false);
     setDropdownVisible(false);
+  };
+
+  const handleLoginWithQR = () => {
+    setIsLoginWithPhone(false);
+    setIsLoginWithQR(true);
+  };
+
+  const handleRegister = () => {
+    setIsLoginWithPhone(false);
+    setIsLoginWithQR(false);
+  };
+
+  const renderAuthPage = () => {
+    if (isLoginWithQR && !isLoginWithPhone) {
+      return <LoginWithQR />;
+    } else if (!isLoginWithQR && isLoginWithPhone) {
+      return <LoginWithPhonePage />;
+    } else {
+      return <RegisterPage />;
+    }
   };
 
   return (
@@ -56,11 +78,9 @@ export default function AuthLayout() {
         {/* Action */}
         <div className="w-[560px] pb-3 bg-white mt-[18px] shadow-xl rounded-lg relative">
           <div className="min-h-14 border-b border-[#f0f0f0] flex items-center justify-center">
-            {isLoginWithQR ? (
-              <p className="text-center font-bold">Đăng nhập qua mã QR</p>
-            ) : (
-              <p className="text-center font-bold">Đăng nhập với mật khẩu</p>
-            )}
+            {isLoginWithQR && <p className="text-center font-bold">Đăng nhập qua mã QR</p>}
+            {isLoginWithPhone && <p className="text-center font-bold">Đăng nhập với mật khẩu</p>}
+            {!isLoginWithQR && !isLoginWithPhone && <p className="text-center font-bold">Đăng ký</p>}
           </div>
 
           {isLoginWithQR ? (
@@ -85,24 +105,26 @@ export default function AuthLayout() {
             </div>
           )}
 
-          <div className="mt-[42px]">{isLoginWithQR ? <LoginWithQR /> : <LoginWithPhonePage />}</div>
+          <div className="mt-[42px]">{renderAuthPage()}</div>
 
           {!isLoginWithQR && (
             <div className="text-center mt-[20px]">
-              <button className="text-[#006af5] text-sm mt-3 font-bold" onClick={() => setIsLoginWithQR(true)}>
+              <button className="text-[#006af5] text-sm mt-3 font-bold" onClick={handleLoginWithQR}>
                 Đăng nhập qua mã QR
               </button>
             </div>
           )}
 
-          <div className="text-center mt-[20px]">
-            <p className="text-[#333] text-[13px]">
-              Bạn chưa có tài khoản?{" "}
-              <Link to="/register" className="text-[#006af5]">
-                Đăng ký
-              </Link>
-            </p>
-          </div>
+          {(isLoginWithPhone || isLoginWithQR) && (
+            <div className="text-center mt-[20px]">
+              <p className="text-[#333] text-[13px]">
+                Bạn chưa có tài khoản?{" "}
+                <span className="text-[#006af5] cursor-pointer" onClick={handleRegister}>
+                  Đăng ký
+                </span>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
