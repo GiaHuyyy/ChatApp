@@ -11,6 +11,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import uploadFileToCloud from "../helpers/uploadFileToClound";
 import axios from "axios";
+import { toast } from "sonner";
+import { useGlobalContext } from "../context/GlobalProvider";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,6 +27,8 @@ export default function RegisterPage() {
 
   const [uploadPhoto, setUploadPhoto] = useState("");
   const fileInputRef = useRef(null);
+
+  const { setIsLoginWithPhone } = useGlobalContext();
 
   const contries = [
     {
@@ -88,10 +92,20 @@ export default function RegisterPage() {
       try {
         const URL = `${import.meta.env.VITE_APP_BACKEND_URL}/api/register`;
         const response = await axios.post(URL, registrationData);
-        console.log(response);
-        console.log(response.data);
+        toast.success(response.data.message);
+        if (response.data.success) {
+          setData({
+            phone: "",
+            name: "",
+            confirmPassword: "",
+            profilePic: "",
+            password: "",
+          });
+          setUploadPhoto("");
+          setIsLoginWithPhone(true);
+        }
       } catch (error) {
-        console.log("Error: ", error.response.data);
+        toast.error(error.response.data.message);
       }
     } catch (error) {
       console.log("Error: " + error);

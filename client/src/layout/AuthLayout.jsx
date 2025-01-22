@@ -5,14 +5,14 @@ import { faBars } from "@fortawesome/free-solid-svg-icons";
 import LoginWithQR from "../pages/LoginWithQR";
 import LoginWithPhonePage from "../pages/LoginWithPhonePage";
 import RegisterPage from "../pages/RegisterPage";
+import { useGlobalContext } from "../context/GlobalProvider";
 
 export default function AuthLayout() {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
 
-  const [isLoginWithQR, setIsLoginWithQR] = useState(true);
-  const [isLoginWithPhone, setIsLoginWithPhone] = useState(false);
+  const { isLoginWithQR, setIsLoginWithQR, isLoginWithPhone, setIsLoginWithPhone } = useGlobalContext();
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
