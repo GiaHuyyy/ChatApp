@@ -4,6 +4,8 @@ import axios from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setToken } from "../redux/userSlice";
 
 export default function CheckPhonePage() {
   const contries = [
@@ -26,6 +28,7 @@ export default function CheckPhonePage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -44,14 +47,17 @@ export default function CheckPhonePage() {
     try {
       const URL = `${import.meta.env.VITE_APP_BACKEND_URL}/api/login`;
       const response = await axios.post(URL, data, { withCredentials: true });
+
       toast.success(response.data.message);
+      console.log(response.data);
       if (response.data.success) {
+        dispatch(setToken(response?.data?.token));
         setData({
           phone: "",
           password: "",
         });
+        navigate("/", { replace: true });
       }
-      navigate("/", { replace: true });
     } catch (error) {
       toast.error(error.response.data.message);
     }
