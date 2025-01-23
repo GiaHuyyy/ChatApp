@@ -1,16 +1,14 @@
 import axios from "axios";
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { logout, setUser } from "../redux/userSlice";
 import { toast } from "sonner";
+import Sidebar from "../components/Sidebar";
 
 export default function Home() {
-  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  console.log("user ", user);
 
   useEffect(() => {
     const fetchUseDetails = async () => {
@@ -25,7 +23,6 @@ export default function Home() {
           dispatch(logout());
           navigate("/auth", { replace: true });
         }
-        console.log(response.data);
       } catch (error) {
         console.log(error.response.data);
       }
@@ -34,11 +31,17 @@ export default function Home() {
   }, [dispatch, navigate]);
 
   return (
-    <div>
-      Home
-      <p>Chào {user?.name}</p>
+    <div className="flex h-screen">
+      {/* Sidebar */}
+      <section className="bg-gray-200 w-[300px]">
+        {/* Main tab */}
+        <Sidebar />
+
+        {/*  */}
+      </section>
+
       {/* Message component */}
-      <section>
+      <section className="bg-slate-500 flex-1">
         <Outlet />
       </section>
     </div>
