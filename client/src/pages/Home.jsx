@@ -33,7 +33,7 @@ export default function Home() {
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <section className="bg-gray-200 w-[300px]">
+      <section className="bg-gray-200 w-[408px]">
         {/* Main tab */}
         <Sidebar />
 
