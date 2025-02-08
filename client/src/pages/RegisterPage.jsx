@@ -115,7 +115,7 @@ export default function RegisterPage() {
   return (
     <div className="flex flex-col items-center">
       <form className="w-[310px]" onSubmit={handleRegister}>
-        <div className="border-b border-[#f0f0f0] flex items-center mb-[18px] py-[5px]">
+        <div className="mb-[18px] flex items-center border-b border-[#f0f0f0] py-[5px]">
           <FontAwesomeIcon icon={faMobileScreenButton} width={8.5} />
           <select name="country" id="country" className="w-[70px] p-1 text-sm">
             {contries.map((country, index) => (
@@ -129,68 +129,68 @@ export default function RegisterPage() {
             name="phone"
             id="phone"
             placeholder="Số điện thoại"
-            className="flex-1 text-sm ml-3"
+            className="ml-3 flex-1 text-sm"
             value={data.phone}
             onChange={handleOnChange}
             required
           />
         </div>
 
-        <div className="border-b border-[#f0f0f0] flex items-center mb-[18px] py-[5px]">
+        <div className="mb-[18px] flex items-center border-b border-[#f0f0f0] py-[5px]">
           <FontAwesomeIcon icon={faUser} width={8.5} />
           <input
             type="text"
             name="name"
             id="name"
             placeholder="Tên người dùng"
-            className="flex-1 text-sm ml-3"
+            className="ml-3 flex-1 text-sm"
             value={data.name}
             onChange={handleOnChange}
             required
           />
         </div>
 
-        <div className="border-b border-[#f0f0f0] flex items-center mb-[18px] py-[5px]">
+        <div className="mb-[18px] flex items-center border-b border-[#f0f0f0] py-[5px]">
           <FontAwesomeIcon icon={faLock} width={8.5} />
           <input
             type={showPassword ? "text" : "password"}
             name="password"
             id="password"
             placeholder="Mật khẩu"
-            className="flex-1 text-sm ml-3"
+            className="ml-3 flex-1 text-sm"
             value={data.password}
             onChange={handleOnChange}
             required
           />
-          <span className="cursor-pointer ml-2" onClick={handleShowPassword}>
+          <span className="ml-2 cursor-pointer" onClick={handleShowPassword}>
             <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} width={10} />
           </span>
         </div>
 
-        <div className="border-b border-[#f0f0f0] flex items-center mb-[18px] py-[5px]">
+        <div className="mb-[18px] flex items-center border-b border-[#f0f0f0] py-[5px]">
           <FontAwesomeIcon icon={faLock} width={8.5} />
           <input
             type={showConfirmPassword ? "text" : "password"}
             name="confirmPassword"
             id="confirmPassword"
             placeholder="Xác nhận mật khẩu"
-            className="flex-1 text-sm ml-3"
+            className="ml-3 flex-1 text-sm"
             value={data.confirmPassword}
             onChange={handleOnChange}
             required
           />
-          <span className="cursor-pointer ml-2" onClick={handleShowConfirmPassword}>
+          <span className="ml-2 cursor-pointer" onClick={handleShowConfirmPassword}>
             <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} width={10} />
           </span>
         </div>
 
-        <div className="border-b border-[#f0f0f0] mb-[18px] py-[5px]">
+        <div className="mb-[18px] border-b border-[#f0f0f0] py-[5px]">
           <label htmlFor="profilePic" className="w-full cursor-pointer">
-            <div className="h-11 bg-slate-200 gap-x-3 flex justify-center items-center border hover:border-[#64b9f7]">
+            <div className="flex h-11 items-center justify-center gap-x-3 border bg-slate-200 hover:border-[#64b9f7]">
               <FontAwesomeIcon icon={faImage} width={14} />
               <p> {uploadPhoto?.name ? uploadPhoto?.name : "Chọn ảnh đại diện"} </p>
               {uploadPhoto?.name && (
-                <button className="hover:text-red-500 px-1" onClick={handleClearUploadPhoto}>
+                <button className="px-1 hover:text-red-500" onClick={handleClearUploadPhoto}>
                   <FontAwesomeIcon icon={faX} width={8} />
                 </button>
               )}
@@ -206,7 +206,7 @@ export default function RegisterPage() {
           />
         </div>
 
-        <button className="h-[44px] px-5 bg-[#0190f3] text-white w-full font-medium">Đăng ký</button>
+        <button className="h-[44px] w-full bg-[#0190f3] px-5 font-medium text-white">Đăng ký</button>
       </form>
     </div>
   );
