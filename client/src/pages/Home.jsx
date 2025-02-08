@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout, setUser } from "../redux/userSlice";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import Sidebar from "../components/Sidebar";
 export default function Home() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchUseDetails = async () => {
@@ -24,16 +25,18 @@ export default function Home() {
           navigate("/auth", { replace: true });
         }
       } catch (error) {
-        console.log(error.response.data);
+        toast.error(error.response.data.message);
       }
     };
     fetchUseDetails();
   }, [dispatch, navigate]);
 
+  const basePath = location.pathname === "/";
+
   return (
     <div className="flex h-screen">
       {/* Sidebar */}
-      <section className="bg-gray-200 w-[408px]">
+      <section className="w-[408px] border-r border-gray-300 bg-white">
         {/* Main tab */}
         <Sidebar />
 
@@ -41,9 +44,20 @@ export default function Home() {
       </section>
 
       {/* Message component */}
-      <section className="bg-slate-500 flex-1">
+      <section className={`flex-1 bg-white ${basePath && "hidden"}`}>
         <Outlet />
       </section>
+
+      {/* Default */}
+      <div className={`flex flex-1 flex-col items-center ${!basePath && "hidden"}`}>
+        <h1 className="mt-20 text-center text-xl">
+          Chào mừng đến với <b>Z PC!</b>
+        </h1>
+        <p className="mt-5 w-1/2 text-center text-sm">
+          Khám phá những tiện ích hỗ trợ làm việc và trò chuyện cùng người thân, bạn bè được tối ưu hóa cho máy tính của
+          bạn.
+        </p>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,9 @@
-import { faEye, faEyeSlash, faLock, faMobile } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEye,
+  faEyeSlash,
+  faLock,
+  faMobile,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useState } from "react";
@@ -66,7 +71,7 @@ export default function CheckPhonePage() {
   return (
     <div className="flex flex-col items-center">
       <form className="w-[310px]" onSubmit={handleLogin}>
-        <div className="border-b border-[#f0f0f0] flex items-center mb-[18px] py-[5px]">
+        <div className="mb-[18px] flex items-center border-b border-[#f0f0f0] py-[5px]">
           <FontAwesomeIcon icon={faMobile} width={8.5} />
           <select name="country" id="country" className="w-[70px] p-1 text-sm">
             {contries.map((country, index) => (
@@ -80,33 +85,38 @@ export default function CheckPhonePage() {
             name="phone"
             id="phone"
             placeholder="Số điện thoại"
-            className="flex-1 text-sm ml-3"
+            className="ml-3 flex-1 text-sm"
             value={data.phone}
             onChange={handleOnChange}
             required
           />
         </div>
 
-        <div className="border-b border-[#f0f0f0] flex items-center mb-[18px] py-[5px]">
+        <div className="mb-[18px] flex items-center border-b border-[#f0f0f0] py-[5px]">
           <FontAwesomeIcon icon={faLock} width={8.5} />
           <input
             type={showPassword ? "text" : "password"}
             name="password"
             id="password"
             placeholder="Mật khẩu"
-            className="flex-1 text-sm ml-3"
+            className="ml-3 flex-1 text-sm"
             value={data.password}
             onChange={handleOnChange}
             required
           />
-          <span className="cursor-pointer ml-2" onClick={handleShowPassword}>
-            <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} width={10} />
+          <span className="ml-2 cursor-pointer" onClick={handleShowPassword}>
+            <FontAwesomeIcon
+              icon={showPassword ? faEyeSlash : faEye}
+              width={10}
+            />
           </span>
         </div>
 
-        <button className="h-[44px] px-5 bg-[#0190f3] text-white w-full font-medium">Đăng nhập với mật khẩu</button>
+        <button className="h-[44px] w-full bg-[#0190f3] px-5 font-medium text-white">
+          Đăng nhập với mật khẩu
+        </button>
       </form>
-      <a href="#!" className="text-sm mt-3">
+      <a href="#!" className="mt-3 text-sm">
         Quên mật khẩu
       </a>
     </div>
