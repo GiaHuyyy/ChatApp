@@ -19,6 +19,8 @@ import EditUserDetails from "./EditUserDetails";
 import DropdownAvatar from "./DropdownAvatar";
 import DropdownSetting from "./DropdownSetting";
 import AddFriend from "./AddFriend";
+import axios from "axios";
+import { Link } from "react-router-dom";
 
 export default function Sidebar() {
   const user = useSelector((state) => state.user);
@@ -36,6 +38,10 @@ export default function Sidebar() {
 
   const [editUserDetails, setEditUserDetails] = useState(false);
   const [addFriend, setAddFriend] = useState(false);
+
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchFriendUserInput, setSearchFriendUserInput] = useState("");
+  const [searchFriendUser, setSearchFriendUser] = useState([]);
 
   const toggleDropdownSetting = () => {
     setDropdownSettingVisible(!dropdownSettingVisible);
@@ -94,6 +100,23 @@ export default function Sidebar() {
     isRef: PropTypes.bool,
   };
 
+  useEffect(() => {
+    const fetchSearchFriendUser = async () => {
+      try {
+        if (!searchFriendUserInput) {
+          return setSearchFriendUser([]);
+        }
+        const URL = `${import.meta.env.VITE_APP_BACKEND_URL}/api/search-friend-user`;
+        const response = await axios.post(URL, { search: searchFriendUserInput }, { withCredentials: true });
+        setSearchFriendUser(response?.data?.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchSearchFriendUser();
+  }, [searchFriendUserInput]);
+
+  console.log(searchFriendUser);
   return (
     <nav className="flex h-full">
       {/* Main tabs */}
@@ -154,7 +177,7 @@ export default function Sidebar() {
       {/* Sidebar action */}
       <div className="flex-1">
         {/* Contact */}
-        <div className="flex h-16 items-center justify-between px-4">
+        <div className="flex h-16 items-center justify-between gap-x-1 px-4">
           <div className="flex h-8 w-60 items-center overflow-hidden rounded-[5px] bg-[#ebecf0] pl-3">
             <FontAwesomeIcon icon={faMagnifyingGlass} width={15} className="text-[#a5a4a4]" />
             <input
@@ -163,51 +186,91 @@ export default function Sidebar() {
               id="search"
               placeholder="Tìm kiếm"
               className="flex-1 bg-transparent pl-1 text-sm"
+              onFocus={() => setIsSearchFocused(true)}
+              value={searchFriendUserInput}
+              onChange={(e) => setSearchFriendUserInput(e.target.value)}
             />
           </div>
 
-          <div className="flex items-center">
-            <button
-              className="flex h-8 w-8 items-center justify-center rounded hover:bg-[#ebecf0]"
-              onClick={() => setAddFriend(true)}
-            >
-              <FontAwesomeIcon icon={faUserPlus} width={18} className="text-[#555454]" />
-            </button>
-            <button className="flex h-8 w-8 items-center justify-center rounded hover:bg-[#ebecf0]">
-              <FontAwesomeIcon icon={faPlus} width={18} className="text-[#555454]" />
-            </button>
+          <div className="flex flex-1 items-center">
+            {!isSearchFocused ? (
+              <>
+                <button
+                  className="flex h-8 w-8 items-center justify-center rounded hover:bg-[#ebecf0]"
+                  onClick={() => setAddFriend(true)}
+                >
+                  <FontAwesomeIcon icon={faUserPlus} width={18} className="text-[#555454]" />
+                </button>
+                <button className="flex h-8 w-8 items-center justify-center rounded hover:bg-[#ebecf0]">
+                  <FontAwesomeIcon icon={faPlus} width={18} className="text-[#555454]" />
+                </button>
+              </>
+            ) : (
+              <button
+                className="h-8 flex-1 rounded text-base font-medium hover:bg-[#ebecf0]"
+                onClick={() => {
+                  setIsSearchFocused(false), setSearchFriendUserInput("");
+                }}
+              >
+                Đóng
+              </button>
+            )}
           </div>
         </div>
 
         {/* Chat */}
         <div className="h-[calc(100%-4rem)]">
-          {/* Chat filter */}
-          <div className="flex h-8 items-center border-b border-gray-300 px-4">
-            <div className="h-full">
-              <button className="mr-3 h-full border-b-[2px] border-[#005ae0] text-[13px] font-semibold text-[#005ae0]">
-                Tất cả
-              </button>
-              <button className="text-[13px] font-semibold text-[#5a6981]">Chưa đọc</button>
-            </div>
-            <div className="ml-auto flex items-center gap-x-4">
-              <button className="flex items-center gap-x-2 pl-2 pr-1">
-                <span className="text-[13px]">Phân loại</span>
-                <FontAwesomeIcon icon={faAngleDown} width={12} />
-              </button>
-              <button>
-                <FontAwesomeIcon icon={faEllipsis} width={12} />
-              </button>
-            </div>
-          </div>
-
-          {/* Chat list */}
-          <div className="h-[calc(100%-2rem)] overflow-y-auto">
-            {allUsers.length === 0 && (
-              <div className="flex h-[calc(100%-4rem)] items-center justify-center">
-                <p className="mt-3 text-sm text-[#5a6981]">Không có tin nhắn nào</p>
+          {!isSearchFocused ? (
+            <div>
+              {/* Chat filter */}
+              <div className="flex h-8 items-center border-b border-gray-300 px-4">
+                <div className="h-full">
+                  <button className="mr-3 h-full border-b-[2px] border-[#005ae0] text-[13px] font-semibold text-[#005ae0]">
+                    Tất cả
+                  </button>
+                  <button className="text-[13px] font-semibold text-[#5a6981]">Chưa đọc</button>
+                </div>
+                <div className="ml-auto flex items-center gap-x-4">
+                  <button className="flex items-center gap-x-2 pl-2 pr-1">
+                    <span className="text-[13px]">Phân loại</span>
+                    <FontAwesomeIcon icon={faAngleDown} width={12} />
+                  </button>
+                  <button>
+                    <FontAwesomeIcon icon={faEllipsis} width={12} />
+                  </button>
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Chat list */}
+              <div className="h-[calc(100%-2rem)] overflow-y-auto">
+                {allUsers.length === 0 && (
+                  <div className="flex h-[calc(100%-4rem)] items-center justify-center">
+                    <p className="mt-3 text-sm text-[#5a6981]">Không có tin nhắn nào</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            // List search
+            <div className="h-full overflow-y-auto">
+              {searchFriendUser.map((user) => (
+                <Link
+                  to={"/" + user._id}
+                  key={user._id}
+                  className="flex items-center gap-x-4 border-b border-gray-300 p-4"
+                  onClick={() => {
+                    setSearchFriendUser([]), setIsSearchFocused(false), setSearchFriendUserInput("");
+                  }}
+                >
+                  <img src={user.profilePic} alt={user.name} className="h-12 w-12 rounded-full object-cover" />
+                  <div className="flex-1">
+                    <p className="text-base font-semibold">{user.name}</p>
+                    <p className="text-sm text-[#5a6981]">{user.phone}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

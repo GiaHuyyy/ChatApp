@@ -18,7 +18,7 @@ export default function DropdownSetting({ dropdownSettingRef, openEditUserDetail
   return (
     <div
       ref={dropdownSettingRef}
-      className="absolute bottom-[66px] left-2 py-2 mt-14 w-56 bg-white shadow-md rounded-md"
+      className="absolute bottom-[66px] left-2 py-2 mt-14 w-56 bg-white shadow-md rounded-md z-10"
     >
       <button className="w-full h-9 px-3 text-left hover:bg-gray-200" onClick={openEditUserDetails}>
         <FontAwesomeIcon icon={faUser} width={20} className="mr-3" />
