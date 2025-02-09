@@ -3,8 +3,9 @@ import Images from "../constants/images";
 import { faAddressCard, faEdit } from "@fortawesome/free-regular-svg-icons";
 import PropTypes from "prop-types";
 import { faBan, faTriangleExclamation, faUserGroup } from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
 
-export default function UserCard({ isUser, dataUser, setInfoUserVisible }) {
+export default function UserCard({ isUser, dataUser, setInfoUserVisible, onClose }) {
   return (
     <div className="max-h-[570px] overflow-y-auto">
       <div className="h-[171px] w-full">
@@ -19,14 +20,20 @@ export default function UserCard({ isUser, dataUser, setInfoUserVisible }) {
         </button>
       </div>
 
-      <div className="flex justify-center gap-x-2 px-4 pb-4">
-        <button className="flex h-8 flex-1 items-center justify-center rounded-[3px] bg-[#e5e7eb] text-sm font-semibold hover:bg-[#c6cad2]">
-          Kết bạn
-        </button>
-        <button className="flex h-8 flex-1 items-center justify-center rounded-[3px] bg-[#dbebff] text-sm font-semibold text-[#0045ad] hover:bg-[#c7e0ff]">
-          Nhắn tin
-        </button>
-      </div>
+      {!isUser && (
+        <div className="flex justify-center gap-x-2 px-4 pb-4">
+          <button className="flex h-8 flex-1 items-center justify-center rounded-[3px] bg-[#e5e7eb] text-sm font-semibold hover:bg-[#c6cad2]">
+            Kết bạn
+          </button>
+          <Link
+            to={"/" + dataUser?._id}
+            onClick={onClose}
+            className="flex h-8 flex-1 items-center justify-center rounded-[3px] bg-[#dbebff] text-sm font-semibold text-[#0045ad] hover:bg-[#c7e0ff]"
+          >
+            Nhắn tin
+          </Link>
+        </div>
+      )}
 
       <div className="h-[6px] w-full bg-[#ebecf0]"></div>
 
@@ -104,4 +111,5 @@ UserCard.propTypes = {
   isUser: PropTypes.bool,
   dataUser: PropTypes.object,
   setInfoUserVisible: PropTypes.func,
+  onClose: PropTypes.func,
 };

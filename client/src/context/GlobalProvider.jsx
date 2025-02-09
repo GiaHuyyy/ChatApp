@@ -9,8 +9,20 @@ export default function GlobalProvider({ children }) {
   const [isLoginWithQR, setIsLoginWithQR] = useState(true);
   const [isLoginWithPhone, setIsLoginWithPhone] = useState(false);
 
+  // Socket connection
+  const [socketConnection, setSocketConnection] = useState(null);
+
   return (
-    <GlobalContext.Provider value={{ isLoginWithQR, setIsLoginWithQR, isLoginWithPhone, setIsLoginWithPhone }}>
+    <GlobalContext.Provider
+      value={{
+        isLoginWithQR,
+        setIsLoginWithQR,
+        isLoginWithPhone,
+        setIsLoginWithPhone,
+        socketConnection,
+        setSocketConnection,
+      }}
+    >
       {children}
     </GlobalContext.Provider>
   );

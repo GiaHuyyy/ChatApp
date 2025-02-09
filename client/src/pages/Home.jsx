@@ -2,14 +2,17 @@ import axios from "axios";
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { logout, setUser } from "../redux/userSlice";
+import { logout, setOnlineUser, setUser } from "../redux/userSlice";
 import { toast } from "sonner";
 import Sidebar from "../components/Sidebar";
+import io from "socket.io-client";
+import { useGlobalContext } from "../context/GlobalProvider";
 
 export default function Home() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const { setSocketConnection } = useGlobalContext();
 
   useEffect(() => {
     const fetchUseDetails = async () => {
@@ -17,19 +20,42 @@ export default function Home() {
         const URL = `${import.meta.env.VITE_APP_BACKEND_URL}/api/user-details`;
         const response = await axios.get(URL, { withCredentials: true });
 
-        dispatch(setUser(response.data.data));
+        dispatch(setUser(response?.data?.data));
 
-        if (response.data.data.logout) {
-          toast.warning(response.data.data.message);
+        if (response?.data?.data?.logout) {
+          toast.warning(response?.data?.data?.message);
           dispatch(logout());
           navigate("/auth", { replace: true });
         }
       } catch (error) {
-        toast.error(error.response.data.message);
+        toast.error(error.response?.data?.message);
       }
     };
     fetchUseDetails();
   }, [dispatch, navigate]);
+
+  /***
+   * Socket connection
+   */
+  useEffect(() => {
+    const socketConnection = io(import.meta.env.VITE_APP_BACKEND_URL, {
+      auth: {
+        token: localStorage.getItem("token"),
+      },
+    });
+
+    socketConnection.on("onlineUser", (data) => {
+      console.log("Online user: ", data);
+      dispatch(setOnlineUser(data));
+    });
+    console.log("Socket connection: ", socketConnection);
+    // Save socket connection to global context
+    setSocketConnection(socketConnection);
+
+    return () => {
+      socketConnection.disconnect();
+    };
+  }, [dispatch, setSocketConnection]);
 
   const basePath = location.pathname === "/";
 
