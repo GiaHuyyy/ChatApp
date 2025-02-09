@@ -1,9 +1,4 @@
-import {
-  faEye,
-  faEyeSlash,
-  faLock,
-  faMobile,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash, faLock, faMobile } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useState } from "react";
@@ -53,10 +48,11 @@ export default function CheckPhonePage() {
       const URL = `${import.meta.env.VITE_APP_BACKEND_URL}/api/login`;
       const response = await axios.post(URL, data, { withCredentials: true });
 
-      toast.success(response.data.message);
-      console.log(response.data);
-      if (response.data.success) {
+      toast.success(response?.data?.message);
+      console.log(response?.data);
+      if (response?.data?.success) {
         dispatch(setToken(response?.data?.token));
+        localStorage.setItem("token", response?.data?.token);
         setData({
           phone: "",
           password: "",
@@ -64,7 +60,7 @@ export default function CheckPhonePage() {
         navigate("/", { replace: true });
       }
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message);
     }
   };
 
@@ -105,16 +101,11 @@ export default function CheckPhonePage() {
             required
           />
           <span className="ml-2 cursor-pointer" onClick={handleShowPassword}>
-            <FontAwesomeIcon
-              icon={showPassword ? faEyeSlash : faEye}
-              width={10}
-            />
+            <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} width={10} />
           </span>
         </div>
 
-        <button className="h-[44px] w-full bg-[#0190f3] px-5 font-medium text-white">
-          Đăng nhập với mật khẩu
-        </button>
+        <button className="h-[44px] w-full bg-[#0190f3] px-5 font-medium text-white">Đăng nhập với mật khẩu</button>
       </form>
       <a href="#!" className="mt-3 text-sm">
         Quên mật khẩu

@@ -22,6 +22,7 @@ import AddFriend from "./AddFriend";
 
 export default function Sidebar() {
   const user = useSelector((state) => state.user);
+  const isOnline = user?.onlineUser?.includes(user?._id);
 
   const [allUsers, setAllUsers] = useState([]);
 
@@ -107,6 +108,10 @@ export default function Sidebar() {
                   className="h-12 w-12 select-none rounded-full object-cover"
                   title={user?.name}
                 />
+                {/* Status online */}
+                {isOnline && (
+                  <div className="absolute bottom-[9px] right-[9px] h-3 w-3 rounded-full border-2 border-white bg-[#2dc937]"></div>
+                )}
               </button>
 
               {/* Dropdown Avatar */}

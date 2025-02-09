@@ -88,7 +88,7 @@ export default function AddFriend({ onClose }) {
               </div>
             </div>
           ) : (
-            <UserCard dataUser={searchUser} />
+            <UserCard dataUser={searchUser} onClose={onClose} />
           )}
         </div>
       </div>
