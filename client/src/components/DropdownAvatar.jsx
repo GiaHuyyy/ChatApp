@@ -19,7 +19,7 @@ export default function DropdownAvatar({ dropdownAvatarRef, dataUser, openEditUs
     }
   };
   return (
-    <div ref={dropdownAvatarRef} className="absolute -top-3 left-16 py-2 mt-14 w-[298px] bg-white shadow-md rounded">
+    <div ref={dropdownAvatarRef} className="absolute -top-3 left-16 py-2 mt-14 w-[298px] bg-white shadow-md rounded z-10">
       <p className="px-2 mb-2 text-lg font-bold">{dataUser?.name}</p>
 
       <div className="h-[1px] bg-[#00000026] my-1 mx-2"></div>

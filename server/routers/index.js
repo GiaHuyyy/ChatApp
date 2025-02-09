@@ -7,6 +7,7 @@ const userDetails = require("../controller/userDetails");
 const updateUserDetails = require("../controller/updateUserDetails");
 const logout = require("../controller/logout");
 const searchUser = require("../controller/searchUser");
+const searchFriendUser = require("../controller/searchFriendUser");
 
 const router = express.Router();
 
@@ -30,6 +31,9 @@ router.post("/update-user", updateUserDetails);
 
 // Search user
 router.post("/search-user", searchUser);
+
+// Search Friend & User
+router.post("/search-friend-user", searchFriendUser);
 
 // Logout user
 router.get("/logout", logout);
