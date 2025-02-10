@@ -21,6 +21,7 @@ import DropdownSetting from "./DropdownSetting";
 import AddFriend from "./AddFriend";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import commingSoon from "../helpers/commingSoon";
 
 export default function Sidebar() {
   const user = useSelector((state) => state.user);
@@ -78,7 +79,7 @@ export default function Sidebar() {
     };
   }, [dropdownSettingRef, buttonSettingRef]);
 
-  const ButtonTab = ({ icon, styles, isActive, isRef, handleClick }) => {
+  const ButtonTab = ({ icon, styles, isActive, isRef, title, handleClick }) => {
     return (
       <button
         ref={isRef ? buttonSettingRef : null}
@@ -86,6 +87,7 @@ export default function Sidebar() {
           isActive ? "bg-[#00000040]" : ""
         } text-white hover:bg-[#38383840] ${styles}`}
         onClick={handleClick}
+        title={title}
       >
         <FontAwesomeIcon icon={icon} />
       </button>
@@ -98,17 +100,20 @@ export default function Sidebar() {
     isActive: PropTypes.bool,
     handleClick: PropTypes.func,
     isRef: PropTypes.bool,
+    title: PropTypes.string,
   };
 
   useEffect(() => {
     const fetchSearchFriendUser = async () => {
       try {
-        if (!searchFriendUserInput) {
-          return setSearchFriendUser([]);
-        }
-        const URL = `${import.meta.env.VITE_APP_BACKEND_URL}/api/search-friend-user`;
-        const response = await axios.post(URL, { search: searchFriendUserInput }, { withCredentials: true });
-        setSearchFriendUser(response?.data?.data);
+        setTimeout(async () => {
+          if (!searchFriendUserInput) {
+            return setSearchFriendUser([]);
+          }
+          const URL = `${import.meta.env.VITE_APP_BACKEND_URL}/api/search-friend-user`;
+          const response = await axios.post(URL, { search: searchFriendUserInput }, { withCredentials: true });
+          setSearchFriendUser(response?.data?.data);
+        }, 1200);
       } catch (error) {
         console.log(error);
       }
@@ -149,19 +154,19 @@ export default function Sidebar() {
 
             {/* Tabs top */}
             <div className="flex flex-col items-center gap-y-2 py-1">
-              <ButtonTab icon={faMessage} isActive={true} />
-              <ButtonTab icon={faAddressBook} />
-              <ButtonTab icon={faSquareCheck} />
+              <ButtonTab title="Tin nhắn" icon={faMessage} isActive={true} />
+              <ButtonTab title="Danh bạ" icon={faAddressBook} handleClick={commingSoon} />
+              <ButtonTab title="Todo" icon={faSquareCheck} handleClick={commingSoon} />
             </div>
           </div>
 
           {/* Tabs bottom */}
           <div className="relative flex flex-col items-center gap-y-[8px] pb-3">
-            <ButtonTab icon={faCloudArrowUp} />
+            <ButtonTab title="Z Cloud" icon={faCloudArrowUp} handleClick={commingSoon} />
             <div className="h-[1px] w-[38px] bg-white"></div>
-            <ButtonTab icon={faCloud} />
-            <ButtonTab icon={faBriefcase} />
-            <ButtonTab icon={faGear} handleClick={toggleDropdownSetting} isRef />
+            <ButtonTab title="Cloud của tôi" icon={faCloud} handleClick={commingSoon} />
+            <ButtonTab title="Công cụ" icon={faBriefcase} handleClick={commingSoon} />
+            <ButtonTab title="Cài đặt" icon={faGear} handleClick={toggleDropdownSetting} isRef />
 
             {/* Dropdown Settings */}
             {dropdownSettingVisible && (
@@ -196,12 +201,17 @@ export default function Sidebar() {
             {!isSearchFocused ? (
               <>
                 <button
+                  title="Thêm bạn"
                   className="flex h-8 w-8 items-center justify-center rounded hover:bg-[#ebecf0]"
                   onClick={() => setAddFriend(true)}
                 >
                   <FontAwesomeIcon icon={faUserPlus} width={18} className="text-[#555454]" />
                 </button>
-                <button className="flex h-8 w-8 items-center justify-center rounded hover:bg-[#ebecf0]">
+                <button
+                  title="Tạo nhóm chat"
+                  className="flex h-8 w-8 items-center justify-center rounded hover:bg-[#ebecf0]"
+                  onClick={commingSoon}
+                >
                   <FontAwesomeIcon icon={faPlus} width={18} className="text-[#555454]" />
                 </button>
               </>
@@ -225,17 +235,24 @@ export default function Sidebar() {
               {/* Chat filter */}
               <div className="flex h-8 items-center border-b border-gray-300 px-4">
                 <div className="h-full">
-                  <button className="mr-3 h-full border-b-[2px] border-[#005ae0] text-[13px] font-semibold text-[#005ae0]">
+                  <button
+                    className="mr-3 h-full border-b-[2px] border-[#005ae0] text-[13px] font-semibold text-[#005ae0]"
+                    onClick={commingSoon}
+                  >
                     Tất cả
                   </button>
-                  <button className="text-[13px] font-semibold text-[#5a6981]">Chưa đọc</button>
+                  <button className="text-[13px] font-semibold text-[#5a6981]" onClick={commingSoon}>
+                    Chưa đọc
+                  </button>
                 </div>
                 <div className="ml-auto flex items-center gap-x-4">
                   <button className="flex items-center gap-x-2 pl-2 pr-1">
-                    <span className="text-[13px]">Phân loại</span>
+                    <span className="text-[13px]" onClick={commingSoon}>
+                      Phân loại
+                    </span>
                     <FontAwesomeIcon icon={faAngleDown} width={12} />
                   </button>
-                  <button>
+                  <button onClick={commingSoon}>
                     <FontAwesomeIcon icon={faEllipsis} width={12} />
                   </button>
                 </div>
