@@ -10,13 +10,18 @@ const messageSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    videoUrl: {
+    fileUrl: {
       type: String,
       default: "",
     },
     seen: {
       type: Boolean,
       default: false,
+    },
+    msgByUserId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
     },
   },
   {
@@ -36,9 +41,9 @@ const conversationSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
-    members: [
+    messages: [
       {
-        type: Array,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Message",
       },
     ],

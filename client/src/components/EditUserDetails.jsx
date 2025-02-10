@@ -37,7 +37,7 @@ export default function EditUserDetails({ onClose, dataUser }) {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 top-0 bg-gray-700 bg-opacity-40">
+    <div className="fixed bottom-0 left-0 right-0 top-0 bg-gray-700 bg-opacity-40 z-30">
       <div className="relative top-[92px] mx-auto w-[400px] rounded bg-white">
         {/* Head */}
         <div className="flex h-12 items-center justify-between border-b border-[#00000026] pl-4 pr-2">
