@@ -52,7 +52,7 @@ export default function MessagePage() {
     fileName: "",
   });
   const [allMessages, setAllMessages] = useState([]);
-  const currentMessage = useRef(null);
+  const messagesEndRef = useRef(null);
 
   const [selectedFile, setSelectedFile] = useState(null);
   const imageInputRef = useRef(null);
@@ -76,9 +76,10 @@ export default function MessagePage() {
   }, [socketConnection, params.userId, user]);
 
   useEffect(() => {
-    if (currentMessage.current) {
-      currentMessage.current.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+    
   }, [allMessages]);
 
   const Button = ({ icon, width, title, styleIcon, isUpload, id, handleOnClick }) => {
@@ -128,12 +129,7 @@ export default function MessagePage() {
     let fileUrl = "";
     if (selectedFile) {
       const uploadFile = await uploadFileToCloud(selectedFile);
-      fileUrl = uploadFile.url;
-      // Ensure the URL starts with https
-      // if (!fileUrl.startsWith("https://")) {
-      //   fileUrl = fileUrl.replace(/^http:\/\//i, "https://");
-      // }
-      
+      fileUrl = uploadFile.secure_url;
     }
 
     const newMessage = {
@@ -221,7 +217,7 @@ export default function MessagePage() {
       {/* Show all message chat */}
       <section className="relative flex-1 overflow-y-auto overflow-x-hidden bg-[#ebecf0]">
         {/* All message chat */}
-        <div className="absolute inset-0 mt-2 flex flex-col gap-y-2 px-4" ref={currentMessage}>
+        <div className="absolute inset-0 mt-2 flex flex-col gap-y-2 px-4">
           {allMessages.map((message) => (
             <div
               key={message._id}
@@ -271,6 +267,7 @@ export default function MessagePage() {
               </div>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Render file preview */}
@@ -298,14 +295,14 @@ export default function MessagePage() {
       {/* Sent message */}
       <footer>
         <div className="flex h-10 items-center gap-x-3 border-b border-t border-[#c8c9cc] px-2">
-          <Button title="Gửi Sticker" icon={faFaceLaughSquint} width={20} handleOnClick={commingSoon}/>
+          <Button title="Gửi Sticker" icon={faFaceLaughSquint} width={20} handleOnClick={commingSoon} />
           <Button title="Gửi hình ảnh" icon={faImage} width={20} isUpload id="image" />
           <Button title="Gửi kèm File" icon={faFolderClosed} width={20} isUpload id="file" />
-          <Button title="Gửi danh thiếp" icon={faAddressCard} width={20} handleOnClick={commingSoon}/>
-          <Button title="Chụp kèm với cửa sổ Z" icon={faCamera} width={20} handleOnClick={commingSoon}/>
-          <Button title="Định dạng tin nhắn" icon={faFilePen} width={20} handleOnClick={commingSoon}/>
-          <Button title="Chèn tin nhắn nhanh" icon={faBolt} width={20} handleOnClick={commingSoon}/>
-          <Button title="Tùy chọn thêm" icon={faEllipsis} width={20} handleOnClick={commingSoon}/>
+          <Button title="Gửi danh thiếp" icon={faAddressCard} width={20} handleOnClick={commingSoon} />
+          <Button title="Chụp kèm với cửa sổ Z" icon={faCamera} width={20} handleOnClick={commingSoon} />
+          <Button title="Định dạng tin nhắn" icon={faFilePen} width={20} handleOnClick={commingSoon} />
+          <Button title="Chèn tin nhắn nhanh" icon={faBolt} width={20} handleOnClick={commingSoon} />
+          <Button title="Tùy chọn thêm" icon={faEllipsis} width={20} handleOnClick={commingSoon} />
         </div>
 
         {/* Input file*/}

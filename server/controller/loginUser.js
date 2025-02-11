@@ -28,6 +28,7 @@ async function loginUser(request, response) {
       httpOnly: true,
       expires: new Date(Date.now() + 60 * 60 * 1000),
       secure: true,
+      sameSite: "None",
     };
 
     return response
