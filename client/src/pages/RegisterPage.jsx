@@ -84,7 +84,7 @@ export default function RegisterPage() {
         if (!uploadPhotoToCloud?.url) {
           throw new Error("Failed to upload profile picture");
         }
-        profilePicUrl = uploadPhotoToCloud.url;
+        profilePicUrl = uploadPhotoToCloud.secure_url;
       }
 
       const registrationData = { ...data, profilePic: profilePicUrl };
