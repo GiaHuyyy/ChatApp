@@ -28,6 +28,7 @@ import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import commingSoon from "../helpers/commingSoon";
 import uploadFileToCloud from "../helpers/uploadFileToClound";
+import { format } from "date-fns";
 
 export default function MessagePage() {
   const params = useParams();
@@ -48,7 +49,10 @@ export default function MessagePage() {
     text: "",
     imageUrl: "",
     fileUrl: "",
+    fileName: "",
   });
+  const [allMessages, setAllMessages] = useState([]);
+  const currentMessage = useRef(null);
 
   const [selectedFile, setSelectedFile] = useState(null);
   const imageInputRef = useRef(null);
@@ -66,9 +70,16 @@ export default function MessagePage() {
 
       socketConnection.on("message", (message) => {
         console.log("Message Data", message);
+        setAllMessages(message.messages);
       });
     }
   }, [socketConnection, params.userId, user]);
+
+  useEffect(() => {
+    if (currentMessage.current) {
+      currentMessage.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [allMessages]);
 
   const Button = ({ icon, width, title, styleIcon, isUpload, id, handleOnClick }) => {
     return isUpload ? (
@@ -118,6 +129,11 @@ export default function MessagePage() {
     if (selectedFile) {
       const uploadFile = await uploadFileToCloud(selectedFile);
       fileUrl = uploadFile.url;
+      // Ensure the URL starts with https
+      // if (!fileUrl.startsWith("https://")) {
+      //   fileUrl = fileUrl.replace(/^http:\/\//i, "https://");
+      // }
+      
     }
 
     const newMessage = {
@@ -126,15 +142,17 @@ export default function MessagePage() {
       text: messages.text,
       imageUrl: selectedFile?.type.startsWith("image/") ? fileUrl : "",
       fileUrl: !selectedFile?.type.startsWith("image/") ? fileUrl : "",
+      fileName: selectedFile?.name,
       msgByUserId: user?._id,
     };
 
-    // Gửi tin nhắn qua socket hoặc API
+    // Gửi tin nhắn qua socket
     socketConnection.emit("newMessage", newMessage);
 
     // Reset state
-    setMessages({ text: "", imageUrl: "", fileUrl: "" });
+    setMessages({ text: "", imageUrl: "", fileUrl: "", fileName: "" });
     setSelectedFile(null);
+    handleClearUploadFile();
   };
 
   const renderFilePreview = () => {
@@ -201,12 +219,65 @@ export default function MessagePage() {
       </header>
 
       {/* Show all message chat */}
-      <section className="relative flex-1 overflow-y-auto bg-[#ebecf0] px-4">
-        Message chat
-        {selectedFile && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-gray-400 bg-opacity-40">
+      <section className="relative flex-1 overflow-y-auto overflow-x-hidden bg-[#ebecf0]">
+        {/* All message chat */}
+        <div className="absolute inset-0 mt-2 flex flex-col gap-y-2 px-4" ref={currentMessage}>
+          {allMessages.map((message) => (
             <div
-              className="relative rounded bg-[#fffefe]"
+              key={message._id}
+              className={`flex gap-x-2 ${message.msgByUserId === user._id ? "justify-end" : "justify-start"}`}
+            >
+              {message.msgByUserId !== user._id && (
+                <button className="flex">
+                  <img
+                    src={dataUser.profilePic}
+                    alt="avatar"
+                    className="h-9 w-9 rounded-full border border-[rgba(0,0,0,0.15)] object-cover"
+                  />
+                </button>
+              )}
+
+              <div
+                className={`h-full max-w-md rounded-md border border-[#c9d0db] p-3 ${
+                  message.msgByUserId === user._id ? "bg-[#dbebff] text-[#081b3a]" : "bg-white text-[#081b3a]"
+                }`}
+              >
+                {message.imageUrl && (
+                  <img src={message.imageUrl} alt="image" className="rounded-[3px] object-contain" />
+                )}
+                {message.fileUrl && (
+                  <div className="flex items-center gap-x-1">
+                    {message.fileUrl.endsWith(".mp4") ||
+                    message.fileUrl.endsWith(".webm") ||
+                    message.fileUrl.endsWith(".ogg") ? (
+                      <video controls className="rounded-[3px] object-contain">
+                        <source src={message.fileUrl} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    ) : (
+                      <>
+                        <FontAwesomeIcon icon={faFilePen} width={20} className="text-[#ccc]" />
+                        <a href={message.fileUrl} className="break-words text-sm">
+                          {message.fileName}
+                        </a>
+                      </>
+                    )}
+                  </div>
+                )}
+                <div>
+                  <p className="break-words text-sm">{message.text}</p>
+                  <p className="mt-1 text-[11px] text-[#00000080]">{format(new Date(message.createdAt), "HH:mm")}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Render file preview */}
+        {selectedFile && (
+          <div className="sticky top-0 z-50 flex h-full items-center justify-center bg-gray-400 bg-opacity-40">
+            <div
+              className="relative rounded bg-[#fffefe] p-4"
               onMouseEnter={() => setOpenTrash(true)}
               onMouseLeave={() => setOpenTrash(false)}
             >
@@ -227,14 +298,14 @@ export default function MessagePage() {
       {/* Sent message */}
       <footer>
         <div className="flex h-10 items-center gap-x-3 border-b border-t border-[#c8c9cc] px-2">
-          <Button title="Gửi Sticker" icon={faFaceLaughSquint} width={20} />
+          <Button title="Gửi Sticker" icon={faFaceLaughSquint} width={20} handleOnClick={commingSoon}/>
           <Button title="Gửi hình ảnh" icon={faImage} width={20} isUpload id="image" />
           <Button title="Gửi kèm File" icon={faFolderClosed} width={20} isUpload id="file" />
-          <Button title="Gửi danh thiếp" icon={faAddressCard} width={20} />
-          <Button title="Chụp kèm với cửa sổ Z" icon={faCamera} width={20} />
-          <Button title="Định dạng tin nhắn" icon={faFilePen} width={20} />
-          <Button title="Chèn tin nhắn nhanh" icon={faBolt} width={20} />
-          <Button title="Tùy chọn thêm" icon={faEllipsis} width={20} />
+          <Button title="Gửi danh thiếp" icon={faAddressCard} width={20} handleOnClick={commingSoon}/>
+          <Button title="Chụp kèm với cửa sổ Z" icon={faCamera} width={20} handleOnClick={commingSoon}/>
+          <Button title="Định dạng tin nhắn" icon={faFilePen} width={20} handleOnClick={commingSoon}/>
+          <Button title="Chèn tin nhắn nhanh" icon={faBolt} width={20} handleOnClick={commingSoon}/>
+          <Button title="Tùy chọn thêm" icon={faEllipsis} width={20} handleOnClick={commingSoon}/>
         </div>
 
         {/* Input file*/}
