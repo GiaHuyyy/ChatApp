@@ -31,7 +31,7 @@ io.on("connection", async (socket) => {
   const user = await getUserDetailsFromToken(token);
 
   // Create a room with user id
-  socket.join(user?._id.toString());
+  socket.join(user?._id?.toString());
   onlineUser.add(user?._id?.toString());
 
   io.emit("onlineUser", Array.from(onlineUser));
@@ -49,6 +49,16 @@ io.on("connection", async (socket) => {
     };
 
     socket.emit("messageUser", payload);
+
+    // Fetch all messages for the conversation
+    const conversation = await ConversationModel.findOne({
+      $or: [
+        { sender: user._id, receiver: userId },
+        { sender: userId, receiver: user._id },
+      ],
+    }).populate("messages").sort({ createdAt: -1 });
+
+    socket.emit('message', conversation);
   });
 
   // New message
@@ -72,6 +82,7 @@ io.on("connection", async (socket) => {
       text: message?.text,
       imageUrl: message?.imageUrl,
       fileUrl: message?.fileUrl,
+      fileName: message?.fileName,
       msgByUserId: message?.msgByUserId,
     });
 
