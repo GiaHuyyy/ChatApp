@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 
-import { faAddressBook, faMessage, faSquareCheck } from "@fortawesome/free-regular-svg-icons";
+import { faAddressBook, faImage, faMessage, faSquareCheck } from "@fortawesome/free-regular-svg-icons";
 import {
   faAngleDown,
   faBriefcase,
   faCloud,
   faCloudArrowUp,
   faEllipsis,
+  faFilePen,
   faGear,
   faMagnifyingGlass,
   faPlus,
@@ -20,12 +21,14 @@ import DropdownAvatar from "./DropdownAvatar";
 import DropdownSetting from "./DropdownSetting";
 import AddFriend from "./AddFriend";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import commingSoon from "../helpers/commingSoon";
+import { useGlobalContext } from "../context/GlobalProvider";
 
 export default function Sidebar() {
   const user = useSelector((state) => state.user);
   const isOnline = user?.onlineUser?.includes(user?._id);
+  const { socketConnection, setSeenMessage } = useGlobalContext();
 
   const [allUsers, setAllUsers] = useState([]);
 
@@ -121,7 +124,31 @@ export default function Sidebar() {
     fetchSearchFriendUser();
   }, [searchFriendUserInput]);
 
-  console.log(searchFriendUser);
+  useEffect(() => {
+    setTimeout(() => {
+      if (socketConnection) {
+        socketConnection.emit("sidebar", user?._id);
+
+        socketConnection.on("conversation", (data) => {
+          console.log("Conversation: ", data);
+
+          if (data) {
+            const conversationUserData = data.map((conversationUser) => {
+              if (conversationUser?.sender?._id === conversationUser?.receiver?._id) {
+                return { ...conversationUser, userDetails: conversationUser?.sender };
+              } else if (conversationUser?.receiver?._id !== user?._id) {
+                return { ...conversationUser, userDetails: conversationUser?.receiver };
+              } else {
+                return { ...conversationUser, userDetails: conversationUser?.sender };
+              }
+            });
+            setAllUsers(conversationUserData);
+          }
+        });
+      }
+    }, 100);
+  }, [socketConnection, user?._id]);
+
   return (
     <nav className="flex h-full">
       {/* Main tabs */}
@@ -259,11 +286,55 @@ export default function Sidebar() {
               </div>
 
               {/* Chat list */}
-              <div className="h-[calc(100%-2rem)] overflow-y-auto">
-                {allUsers.length === 0 && (
+              <div className="scrollbar h-[calc(100%-2rem)] overflow-y-auto">
+                {allUsers.length === 0 ? (
                   <div className="flex h-[calc(100%-4rem)] items-center justify-center">
                     <p className="mt-3 text-sm text-[#5a6981]">Không có tin nhắn nào</p>
                   </div>
+                ) : (
+                  allUsers.map((user) => (
+                    <NavLink
+                      to={"/" + user?.userDetails?._id}
+                      key={user?._id}
+                      className="flex h-[74px] items-center px-4 hover:bg-[#f1f2f4]"
+                      onClick={() => user?.unseenMessages > 0 && setSeenMessage(true)}
+                    >
+                      <img
+                        src={user?.userDetails?.profilePic}
+                        alt={user?.userDetails?.name}
+                        className="h-12 w-12 rounded-full object-cover"
+                      />
+                      <div className="ml-3 flex-1 overflow-hidden">
+                        <p className="text-[15px] font-semibold">{user?.userDetails?.name}</p>
+                        <p className="max-w-48 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] text-[#5a6981]">
+                          {user?.latestMessage?.msgByUserId !== user?.userDetails?._id ? "Bạn: " : ""}
+                          {user?.latestMessage?.text && user?.latestMessage?.text}
+                          {user?.latestMessage?.imageUrl && (
+                            <>
+                              <FontAwesomeIcon icon={faImage} width={15} className="text-[#ccc]" />
+                              {user?.latestMessage?.fileName}
+                            </>
+                          )}
+                          {user?.latestMessage?.fileUrl && (
+                            <>
+                              <FontAwesomeIcon icon={faFilePen} width={15} className="text-[#ccc]" />
+                              {user?.latestMessage?.fileName}
+                            </>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-center gap-y-1">
+                        <p className="text-xs text-[#5a6981]">
+                          {new Date(user?.latestMessage?.createdAt).toLocaleTimeString()}
+                        </p>
+                        {user?.unseenMessages > 0 && (
+                          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-red-700">
+                            <span className="mr-[1px] mt-[1px] text-[10px] text-white">{user?.unseenMessages}</span>
+                          </div>
+                        )}
+                      </div>
+                    </NavLink>
+                  ))
                 )}
               </div>
             </div>
@@ -271,7 +342,7 @@ export default function Sidebar() {
             // List search
             <div className="h-full overflow-y-auto">
               {searchFriendUser.map((user) => (
-                <Link
+                <NavLink
                   to={"/" + user._id}
                   key={user._id}
                   className="flex items-center gap-x-4 border-b border-gray-300 p-4"
@@ -284,7 +355,7 @@ export default function Sidebar() {
                     <p className="text-base font-semibold">{user.name}</p>
                     <p className="text-sm text-[#5a6981]">{user.phone}</p>
                   </div>
-                </Link>
+                </NavLink>
               ))}
             </div>
           )}

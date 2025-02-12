@@ -32,7 +32,7 @@ import { format } from "date-fns";
 
 export default function MessagePage() {
   const params = useParams();
-  const { socketConnection } = useGlobalContext();
+  const { socketConnection, seenMessage, setSeenMessage } = useGlobalContext();
   const user = useSelector((state) => state?.user);
   console.log("params", params);
   console.log("Socket Connection Status:", socketConnection);
@@ -53,6 +53,7 @@ export default function MessagePage() {
   });
   const [allMessages, setAllMessages] = useState([]);
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   const [selectedFile, setSelectedFile] = useState(null);
   const imageInputRef = useRef(null);
@@ -63,6 +64,8 @@ export default function MessagePage() {
     if (socketConnection) {
       socketConnection.emit("joinRoom", params.userId);
 
+      socketConnection.emit("seen", params.userId);
+
       socketConnection.on("messageUser", (payload) => {
         console.log("Message User: ", payload);
         setDataUser(payload);
@@ -70,17 +73,22 @@ export default function MessagePage() {
 
       socketConnection.on("message", (message) => {
         console.log("Message Data", message);
-        setAllMessages(message.messages);
+        setAllMessages(message?.messages || []);
       });
     }
-  }, [socketConnection, params.userId, user]);
+  }, [socketConnection, params.userId]);
 
   useEffect(() => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
-    
   }, [allMessages]);
+
+  useEffect(() => {
+    if (seenMessage) {
+      inputRef.current?.focus();
+    }
+  }, [seenMessage]);
 
   const Button = ({ icon, width, title, styleIcon, isUpload, id, handleOnClick }) => {
     return isUpload ? (
@@ -151,6 +159,10 @@ export default function MessagePage() {
     handleClearUploadFile();
   };
 
+  const handleSeenMessage = () => {
+    socketConnection.emit("seen", params.userId);
+  };
+
   const renderFilePreview = () => {
     if (!selectedFile) return null;
 
@@ -215,7 +227,7 @@ export default function MessagePage() {
       </header>
 
       {/* Show all message chat */}
-      <section className="relative flex-1 overflow-y-auto overflow-x-hidden bg-[#ebecf0]">
+      <section className="scrollbar relative flex-1 overflow-y-auto overflow-x-hidden bg-[#ebecf0]">
         {/* All message chat */}
         <div className="absolute inset-0 mt-2 flex flex-col gap-y-2 px-4">
           {allMessages.map((message) => (
@@ -324,6 +336,12 @@ export default function MessagePage() {
             className="h-full flex-1 rounded-[3px] text-sm"
             value={messages.text}
             onChange={(e) => setMessages({ ...messages, text: e.target.value })}
+            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+            onFocus={() => {
+              handleSeenMessage();
+            }}
+            onBlur={() => setSeenMessage(false)}
+            ref={inputRef}
           />
           <div className="flex items-center gap-x-1">
             <Button title="Biểu cảm" icon={faFaceSmile} width={20} />

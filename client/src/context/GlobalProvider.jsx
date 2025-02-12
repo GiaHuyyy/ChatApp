@@ -12,6 +12,9 @@ export default function GlobalProvider({ children }) {
   // Socket connection
   const [socketConnection, setSocketConnection] = useState(null);
 
+  // Seen message
+  const [seenMessage, setSeenMessage] = useState(false);
+  
   return (
     <GlobalContext.Provider
       value={{
@@ -21,6 +24,8 @@ export default function GlobalProvider({ children }) {
         setIsLoginWithPhone,
         socketConnection,
         setSocketConnection,
+        seenMessage,
+        setSeenMessage,
       }}
     >
       {children}

@@ -25,6 +25,7 @@ export default function Home() {
         if (response?.data?.data?.logout) {
           toast.warning(response?.data?.data?.message);
           dispatch(logout());
+          localStorage.removeItem("token");
           navigate("/auth", { replace: true });
         }
       } catch (error) {
