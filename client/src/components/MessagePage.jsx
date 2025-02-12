@@ -21,6 +21,8 @@ import {
   faPaperPlane,
   faPhone,
   faPlus,
+  faQuoteRight,
+  faShare,
   faTrash,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
@@ -29,6 +31,7 @@ import PropTypes from "prop-types";
 import commingSoon from "../helpers/commingSoon";
 import uploadFileToCloud from "../helpers/uploadFileToClound";
 import { format } from "date-fns";
+import EmojiPicker from "emoji-picker-react";
 
 export default function MessagePage() {
   const params = useParams();
@@ -60,6 +63,13 @@ export default function MessagePage() {
   const fileInputRef = useRef(null);
   const [openTrash, setOpenTrash] = useState(false);
 
+  const [openEmoji, setOpenEmoji] = useState(false);
+  const emojiPickerRef = useRef(null);
+
+  const [hoveredLikeMessage, setHoveredLikeMessage] = useState(null);
+
+  const [hoveredMessage, setHoveredMessage] = useState(null);
+
   useEffect(() => {
     if (socketConnection) {
       socketConnection.emit("joinRoom", params.userId);
@@ -89,6 +99,21 @@ export default function MessagePage() {
       inputRef.current?.focus();
     }
   }, [seenMessage]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setOpenEmoji(false);
+      }
+    }
+
+    if (openEmoji) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openEmoji]);
 
   const Button = ({ icon, width, title, styleIcon, isUpload, id, handleOnClick }) => {
     return isUpload ? (
@@ -159,6 +184,19 @@ export default function MessagePage() {
     handleClearUploadFile();
   };
 
+  const handleSendEmojiLike = () => {
+    const emojiMessage = {
+      sender: user._id,
+      receiver: params.userId,
+      text: messages.text + "👍",
+      imageUrl: "",
+      fileUrl: "",
+      fileName: "",
+      msgByUserId: user?._id,
+    };
+    socketConnection.emit("newMessage", emojiMessage);
+  };
+
   const handleSeenMessage = () => {
     socketConnection.emit("seen", params.userId);
   };
@@ -219,21 +257,23 @@ export default function MessagePage() {
         </div>
         <div className="flex items-center space-x-[3px]">
           <Button title="Thêm bạn vào nhóm" icon={faPlus} width={20} handleOnClick={commingSoon} />
-          <Button title="Cuộc gọi thoại" icon={faPhone} width={20} />
-          <Button title="Cuộc gọi video" icon={faVideo} width={20} />
-          <Button title="Tìm kiếm tin nhắn" icon={faMagnifyingGlass} width={18} />
-          <Button title="Thông tin hội thoại" icon={faBars} width={18} />
+          <Button title="Cuộc gọi thoại" icon={faPhone} width={20} handleOnClick={commingSoon} />
+          <Button title="Cuộc gọi video" icon={faVideo} width={20} handleOnClick={commingSoon} />
+          <Button title="Tìm kiếm tin nhắn" icon={faMagnifyingGlass} width={18} handleOnClick={commingSoon} />
+          <Button title="Thông tin hội thoại" icon={faBars} width={18} handleOnClick={commingSoon} />
         </div>
       </header>
 
       {/* Show all message chat */}
       <section className="scrollbar relative flex-1 overflow-y-auto overflow-x-hidden bg-[#ebecf0]">
         {/* All message chat */}
-        <div className="absolute inset-0 mt-2 flex flex-col gap-y-2 px-4">
+        <div className="absolute inset-0 mt-2 flex flex-col gap-y-5 px-4">
           {allMessages.map((message) => (
             <div
               key={message._id}
               className={`flex gap-x-2 ${message.msgByUserId === user._id ? "justify-end" : "justify-start"}`}
+              onMouseEnter={() => setHoveredMessage(message._id)}
+              onMouseLeave={() => setHoveredMessage(null)}
             >
               {message.msgByUserId !== user._id && (
                 <button className="flex">
@@ -246,7 +286,7 @@ export default function MessagePage() {
               )}
 
               <div
-                className={`h-full max-w-md rounded-md border border-[#c9d0db] p-3 ${
+                className={`relative h-full max-w-md rounded-md border border-[#c9d0db] p-3 ${
                   message.msgByUserId === user._id ? "bg-[#dbebff] text-[#081b3a]" : "bg-white text-[#081b3a]"
                 }`}
               >
@@ -276,6 +316,63 @@ export default function MessagePage() {
                   <p className="break-words text-sm">{message.text}</p>
                   <p className="mt-1 text-[11px] text-[#00000080]">{format(new Date(message.createdAt), "HH:mm")}</p>
                 </div>
+
+                <div
+                  className="absolute -bottom-2 -right-2 flex cursor-pointer items-center gap-x-1 rounded-full bg-white px-1 py-[3px]"
+                  onMouseEnter={() => {
+                    setHoveredLikeMessage(message._id), setHoveredMessage(null);
+                  }}
+                  onMouseLeave={() => setHoveredLikeMessage(null)}
+                >
+                  <FontAwesomeIcon icon={faThumbsUp} width={14} className="text-[#8b8b8b]" />
+
+                  {hoveredLikeMessage === message._id && (
+                    <div
+                      className={`absolute bottom-4 z-50 ${message.msgByUserId === user._id ? "right-8" : "left-8"}`}
+                    >
+                      <EmojiPicker
+                        emojiStyle="apple"
+                        reactionsDefaultOpen={true}
+                        onEmojiClick={(emojiData) => {
+                          console.log("Chọn emoji:", emojiData.emoji);
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {hoveredMessage === message._id && (
+                  <div
+                    className={`absolute bottom-3 ${message.msgByUserId === user._id ? "-left-20" : "-right-20"} flex items-center gap-x-1`}
+                  >
+                    <button
+                      className="group flex items-center justify-center rounded-full bg-white px-[6px] py-[3px]"
+                      onClick={commingSoon}
+                    >
+                      <FontAwesomeIcon
+                        icon={faQuoteRight}
+                        width={10}
+                        className="text-[#5a5a5a] group-hover:text-[#005ae0]"
+                      />
+                    </button>
+                    <button
+                      className="group flex items-center justify-center rounded-full bg-white px-[6px] py-[3px]"
+                      onClick={commingSoon}
+                    >
+                      <FontAwesomeIcon
+                        icon={faShare}
+                        width={10}
+                        className="text-[#5a5a5a] group-hover:text-[#005ae0]"
+                      />
+                    </button>
+                    <button
+                      className="group flex items-center justify-center rounded-full bg-white px-[6px] py-[3px]"
+                      onClick={commingSoon}
+                    >
+                      <FontAwesomeIcon icon={faTrash} width={10} className="text-[#5a5a5a] group-hover:text-red-600" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -305,9 +402,9 @@ export default function MessagePage() {
       </section>
 
       {/* Sent message */}
-      <footer>
+      <footer className="relative">
         <div className="flex h-10 items-center gap-x-3 border-b border-t border-[#c8c9cc] px-2">
-          <Button title="Gửi Sticker" icon={faFaceLaughSquint} width={20} handleOnClick={commingSoon} />
+          <Button title="Gửi Sticker" icon={faFaceLaughSquint} width={20} handleOnClick={() => setOpenEmoji(true)} />
           <Button title="Gửi hình ảnh" icon={faImage} width={20} isUpload id="image" />
           <Button title="Gửi kèm File" icon={faFolderClosed} width={20} isUpload id="file" />
           <Button title="Gửi danh thiếp" icon={faAddressCard} width={20} handleOnClick={commingSoon} />
@@ -317,6 +414,23 @@ export default function MessagePage() {
           <Button title="Tùy chọn thêm" icon={faEllipsis} width={20} handleOnClick={commingSoon} />
         </div>
 
+        {/* Emoji Picker React*/}
+        {openEmoji && (
+          <div ref={emojiPickerRef} className="absolute bottom-24 left-0 z-50">
+            <EmojiPicker
+              disableSearchBar
+              disableSkinTonePicker
+              emojiStyle="apple"
+              height={400}
+              width={300}
+              // reactionsDefaultOpen={true}
+              searchDisabled
+              onEmojiClick={(emojiData) => {
+                setMessages({ ...messages, text: messages.text + emojiData.emoji });
+              }}
+            />
+          </div>
+        )}
         {/* Input file*/}
         <input
           type="file"
@@ -344,9 +458,14 @@ export default function MessagePage() {
             ref={inputRef}
           />
           <div className="flex items-center gap-x-1">
-            <Button title="Biểu cảm" icon={faFaceSmile} width={20} />
+            <Button title="Biểu cảm" icon={faFaceSmile} width={20} handleOnClick={() => setOpenEmoji(true)} />
             {messages.text === "" && !selectedFile ? (
-              <Button title="Gửi nhanh biểu tưởng cảm xúc" icon={faThumbsUp} width={20} />
+              <Button
+                title="Gửi nhanh biểu tưởng cảm xúc"
+                icon={faThumbsUp}
+                width={20}
+                handleOnClick={handleSendEmojiLike}
+              />
             ) : (
               <Button
                 title="Gửi tin nhắn"
