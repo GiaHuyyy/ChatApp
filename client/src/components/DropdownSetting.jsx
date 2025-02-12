@@ -4,9 +4,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Images from "../constants/images";
 import { useState } from "react";
 import PropTypes from "prop-types";
+import axios from "axios";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export default function DropdownSetting({ dropdownSettingRef, openEditUserDetails }) {
   const [submenuVisible, setSubmenuVisible] = useState(null);
+  const navigate = useNavigate();
 
   const handleMouseEnter = (menu) => {
     setSubmenuVisible(menu);
@@ -14,6 +18,19 @@ export default function DropdownSetting({ dropdownSettingRef, openEditUserDetail
 
   const handleMouseLeave = () => {
     setSubmenuVisible(null);
+  };
+
+  const handleLogout = async () => {
+    const URL = `${import.meta.env.VITE_APP_BACKEND_URL}/api/logout`;
+    try {
+      const response = await axios.get(URL, { withCredentials: true });
+      toast.success(response.data.message);
+      console.log(response.data);
+      localStorage.removeItem("token");
+      navigate("/auth", { replace: true });
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
   };
   return (
     <div
@@ -97,7 +114,7 @@ export default function DropdownSetting({ dropdownSettingRef, openEditUserDetail
 
       <div className="h-[1px] bg-[#00000026] my-1 mx-2"></div>
 
-      <button className="w-full h-9 px-3 text-left hover:bg-gray-200">
+      <button className="w-full h-9 px-3 text-left hover:bg-gray-200" onClick={handleLogout}>
         <span className="mr-[32px]"></span>
         <span className="text-sm text-[#c31818]">Đăng xuất</span>
       </button>

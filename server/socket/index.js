@@ -2,6 +2,7 @@ const express = require("express");
 const { Server } = require("socket.io");
 const http = require("http");
 const getUserDetailsFromToken = require("../helpers/getUserDetailsFromToken");
+const getConversation = require("../helpers/getConversation");
 const UserModel = require("../models/UserModel");
 const { ConversationModel, MessageModel } = require("../models/ConversationModel");
 const app = express();
@@ -56,9 +57,11 @@ io.on("connection", async (socket) => {
         { sender: user._id, receiver: userId },
         { sender: userId, receiver: user._id },
       ],
-    }).populate("messages").sort({ createdAt: -1 });
+    })
+      .populate("messages")
+      .sort({ createdAt: -1 });
 
-    socket.emit('message', conversation);
+    socket.emit("message", conversation);
   });
 
   // New message
@@ -71,6 +74,7 @@ io.on("connection", async (socket) => {
       ],
     });
 
+    // If conversation not available then create new conversation
     if (!conversation) {
       conversation = await ConversationModel.create({
         sender: message?.sender,
@@ -96,10 +100,57 @@ io.on("connection", async (socket) => {
         { sender: message?.sender, receiver: message?.receiver },
         { sender: message?.receiver, receiver: message?.sender },
       ],
-    }).populate("messages").sort({ createdAt: -1 });
+    })
+      .populate("messages")
+      .sort({ createdAt: -1 });
 
-    io.to(message?.sender).emit('message', getConversationMessage);
-    io.to(message?.receiver).emit('message', getConversationMessage);
+    io.to(message?.sender).emit("message", getConversationMessage);
+    io.to(message?.receiver).emit("message", getConversationMessage);
+
+    // Send message to conversation room
+    const conversationSender = await getConversation(message?.sender);
+    const conversationReceiver = await getConversation(message?.receiver);
+
+    io.to(message?.sender).emit("conversation", conversationSender);
+    io.to(message?.receiver).emit("conversation", conversationReceiver);
+  });
+
+  // Sidebar
+  socket.on("sidebar", async (currentUserId) => {
+    console.log("Current User: ", currentUserId);
+
+    const conversation = await getConversation(currentUserId);
+
+    socket.emit("conversation", conversation);
+  });
+
+  // Seen
+  socket.on("seen", async (msgByUserId) => {
+    let conversation = await ConversationModel.findOne({
+      $or: [
+        { sender: user?._id, receiver: msgByUserId },
+        { sender: msgByUserId, receiver: user?._id },
+      ],
+    });
+
+    const conversationMessageId = conversation?.messages || [];
+
+    const updateMessage = await MessageModel.updateMany(
+      {
+        _id: { $in: conversationMessageId },
+        msgByUserId: msgByUserId,
+        seen: false, // Chỉ cập nhật tin nhắn chưa được xem
+      },
+      { $set: { seen: true } }
+    );
+    
+
+    // Send message to conversation room
+    const conversationSender = await getConversation(user?._id?.toString());
+    const conversationReceiver = await getConversation(msgByUserId);
+
+    io.to(user?._id?.toString()).emit("conversation", conversationSender);
+    io.to(msgByUserId).emit("conversation", conversationReceiver);
   });
 
   //   Disconnect

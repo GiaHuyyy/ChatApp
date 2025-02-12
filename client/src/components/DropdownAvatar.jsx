@@ -13,6 +13,7 @@ export default function DropdownAvatar({ dropdownAvatarRef, dataUser, openEditUs
       const response = await axios.get(URL, { withCredentials: true });
       toast.success(response.data.message);
       console.log(response.data);
+      localStorage.removeItem("token");
       navigate("/auth", { replace: true });
     } catch (error) {
       toast.error(error.response.data.message);
